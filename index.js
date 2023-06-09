@@ -26,14 +26,22 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const popularclassCollection = client.db('fashiondb').collection('popularClass')
+    const classCollection = client.db('fashiondb').collection('popularClass')
+    const instractorCollection = client.db('fashiondb').collection('popularInstractor')
 
     // Popular class api
 
     app.get('/student', async(req, res)=>{
-        const result = await popularclassCollection.find().toArray()
+        const result = await classCollection.find().toArray()
         res.send(result);
     })
+
+    // Popular Instractor
+    app.get('/instractor', async(req, res)=>{
+      const result = await instractorCollection.find().toArray()
+      
+      res.send(result);
+  })
 
 
     // Send a ping to confirm a successful connection
