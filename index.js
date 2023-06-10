@@ -28,6 +28,16 @@ async function run() {
 
     const classCollection = client.db('fashiondb').collection('popularClass')
     const instractorCollection = client.db('fashiondb').collection('popularInstractor')
+    const usersCollection = client.db('fashiondb').collection('users');
+
+
+    // user
+    app.post('/users', async(req, res) =>{
+      const user =  req.body;
+      const result = await usersCollection.insertOne(user)
+      res.send(result);
+    } )
+
 
     // Popular class api
 
