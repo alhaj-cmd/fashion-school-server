@@ -10,6 +10,7 @@ app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const e = require('cors');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4s3yid7.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -31,9 +32,14 @@ async function run() {
     const usersCollection = client.db('fashiondb').collection('users');
 
 
-    // user
+    // user api
     app.post('/users', async(req, res) =>{
       const user =  req.body;
+      const query = {email: user.email}
+      const existingUser = await usersCollection.findOne(query)
+      if(existingUser){
+        return res.send({message:'user already existing'})
+      }
       const result = await usersCollection.insertOne(user)
       res.send(result);
     } )
