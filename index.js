@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const e = require('cors');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.4s3yid7.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -34,8 +34,9 @@ async function run() {
 
     // user api
 
-    app.get('/user', async(req, res ) =>{
+    app.get('/users', async(req, res ) =>{
       const result = await usersCollection.find().toArray();
+      console.log(result);
       res.send(result);
     })
 
@@ -50,6 +51,22 @@ async function run() {
       const result = await usersCollection.insertOne(user)
       res.send(result);
     } )
+
+
+    app.patch('users/admin/:id', async (req, res) =>{
+      const id = req.params.id;
+      const filter = {_id:new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          role: 'admin',
+          role:'instractor'
+        },
+      };
+
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+
+    })
 
 
     // Popular class api
