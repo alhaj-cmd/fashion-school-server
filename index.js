@@ -66,7 +66,16 @@ async function run() {
       res.send(result);
     })
 
+//  users collection
 
+app.post('/addCart', async(req, res) =>{
+  const item = req.body;
+  console.log(item);
+  const result = await usersCollection.insertOne(item);
+  res.send(result);
+})
+
+// user admin
     app.post('/users', async(req, res) =>{
       const user =  req.body;
       const query = {email: user.email}
