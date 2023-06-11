@@ -2,11 +2,29 @@ const express = require('express');
 const app = express();
 const cors =  require('cors');
 require('dotenv').config();
+const jwt = require ('jsonwebtoken');
 const port =  process.env.PORT || 5000;
 
 // middeware
 app.use(cors());
 app.use(express.json());
+
+// verifyJwt 
+const verifyJwt = (req, res, next) =>{
+  const authorization = req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({error: true, message:'unauthorized access'})
+  }
+  // bearer token
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+    if(err){
+      return res.status(401).send({error:true, message:'unauthorized'})
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -31,6 +49,14 @@ async function run() {
     const instractorCollection = client.db('fashiondb').collection('popularInstractor')
     const usersCollection = client.db('fashiondb').collection('users');
 
+    // jwt
+    app.post('/jwt', (req, res)=>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn:'15d'})
+      res.send({token})
+
+
+    })
 
     // user api
 
@@ -53,7 +79,7 @@ async function run() {
     } )
 
 // admin 
-    app.patch('users/admin/:id', async (req, res) =>{
+    app.patch('/users/admin/:id', async (req, res) =>{
       const id = req.params.id;
       const filter = {_id:new ObjectId(id)};
       const updateDoc = {
@@ -68,7 +94,7 @@ async function run() {
     })
 
     //instractor
-    app.patch('users/instractor/:id', async (req, res) =>{
+    app.patch('/users/instractor/:id', async (req, res) =>{
       const id = req.params.id;
       const filter = {_id:new ObjectId(id)};
       const updateDoc = {
