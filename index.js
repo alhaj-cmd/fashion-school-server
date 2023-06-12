@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // verifyJwt 
-const verifyJwt = (req, res, next) => {
+const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (!authorization) {
     return res.status(401).send({ error: true, message: 'unauthorized access' })
@@ -59,20 +59,19 @@ async function run() {
 
     })
 
-    // user api
-
-    app.get('/users', async (req, res) => {
-      const result = await usersCollection.find().toArray();
-      console.log(result);
-      res.send(result);
-    })
 
     //  addCart collection 
-    app.get('/addCard', async (req, res) => {
+    app.get('/addCard', verifyJWT, async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
       }
+
+      const decodedEmail = req.decoded.email;
+      if(email !== decodedEmail){
+        return res.status(403).send({ error: true, message: 'Forbiden' })
+      }
+
       const query = { email: email };
       const result = await addCardCollection.find(query).toArray();
       res.send(result);
@@ -93,6 +92,16 @@ async function run() {
       res.send(result);
     })
 
+
+    
+    // user api
+
+    app.get('/users', async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      console.log(result);
+      res.send(result);
+    })
+
     // user admin
     app.post('/users', async (req, res) => {
       const user = req.body;
@@ -104,6 +113,35 @@ async function run() {
       const result = await usersCollection.insertOne(user)
       res.send(result);
     })
+
+    //  admin email
+    app.get('/users/admin/:email', verifyJWT, async(req, res) =>{
+      const email = req.params.email;
+
+      if(req.decoded.email !== email){
+        res.send({admin:false})
+      }
+
+      const query = {email:email}
+      const user = await usersCollection.findOne(query);
+      const result = {admin: user?.role==='admin'}
+      res.send(result);
+    })
+
+    // instractor email
+    app.get('/users/instractor/:email', verifyJWT, async(req, res) =>{
+      const email = req.params.email;
+
+      if(req.decoded.email !== email){
+        res.send({instractor:false})
+      }
+
+      const query = {email:email}
+      const user = await usersCollection.findOne(query);
+      const result = {instractor: user?.role==='instractor'}
+      res.send(result);
+    })
+
 
     // admin 
     app.patch('/users/admin/:id', async (req, res) => {
