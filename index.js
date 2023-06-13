@@ -56,7 +56,8 @@ async function run() {
     const instractorCollection = client.db('fashiondb').collection('popularInstractor')
     const addCardCollection = client.db('fashiondb').collection('addCard')
     const usersCollection = client.db('fashiondb').collection('users');
-
+    const AddCollection = client.db('fashiondb').collection('add');
+    
     // jwt
     app.post('/jwt', (req, res) => {
       const user = req.body;
@@ -105,6 +106,15 @@ async function run() {
       const query =  {email:email}
       const user = await usersCollection.findOne(query);
       if(user?.role !== 'admin'){
+        return res.status(403).send({ error: true, message: 'Forbiden' })
+      }
+      next();
+    }
+    const verifyInstractor = async (req, res, next) =>{
+      const email =  req.decoded.email;
+      const query =  {email:email}
+      const user = await usersCollection.findOne(query);
+      if(user?.role !== 'instractor'){
         return res.status(403).send({ error: true, message: 'Forbiden' })
       }
       next();
@@ -205,7 +215,19 @@ async function run() {
 
       res.send(result);
     })
+    app.get('/addinstractor', async (req, res) => {
+      const result = await AddCollection.find().toArray()
 
+      res.send(result);
+    })
+
+
+    app.post('/instractor', verifyJWT, verifyInstractor,  async(req, res) =>{
+      const newItem = req.body;
+      const result = await AddCollection.insertOne(newItem)
+      res.send(result);
+
+    } )
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
