@@ -6,7 +6,14 @@ const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 // middeware
-app.use(cors());
+// app.use(cors());
+const corsOptions ={
+   origin:'*', 
+   credentials:true,
+   optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json());
 
 // verifyJwt 
