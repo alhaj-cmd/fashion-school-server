@@ -122,7 +122,7 @@ async function run() {
 
 
     
-    // user api
+    // user api 
 
     app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
@@ -215,12 +215,35 @@ async function run() {
 
       res.send(result);
     })
+
+    // My class page all class
     app.get('/addinstractor', async (req, res) => {
       const result = await AddCollection.find().toArray()
 
       res.send(result);
     })
 
+
+    // My class Instractor
+
+  
+    app.get('/manage', verifyJWT, async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+          res.send([]);
+      }
+
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+          return res.status(403).send({ error: true, message: 'forbidden access' });
+      }
+      const query = { email: email };
+      const result = await AddCollection.find(query).toArray();
+      res.send(result);
+
+  })
+
+// 
 
     app.post('/instractor', verifyJWT, verifyInstractor,  async(req, res) =>{
       const newItem = req.body;
